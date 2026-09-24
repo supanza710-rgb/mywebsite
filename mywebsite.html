@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Chain Telematics - Master Report & Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0b1320;
+            --bg-card: #141e30;
+            --bg-card-hover: #1c2a42;
+            --accent-green: #00e676;
+            --accent-cyan: #00e5ff;
+            --accent-blue: #29b6f6;
+            --accent-orange: #ff9100;
+            --text-main: #e0e6ed;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+            --code-bg: #070c14;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Kanit', sans-serif; background-color: var(--bg-main); color: var(--text-main); line-height: 1.7; padding: 20px 15px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 15px 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); flex-wrap: wrap; gap: 10px; }
+        .nav-brand { font-size: 1.1rem; font-weight: 600; color: var(--accent-cyan); display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 8px; list-style: none; overflow-x: auto; width: 100%; padding-bottom: 5px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; padding: 5px 10px; border-radius: 6px; white-space: nowrap; transition: 0.3s; background: rgba(255,255,255,0.03); }
+        .nav-links a:hover { color: var(--accent-cyan); background: rgba(0, 229, 255, 0.1); }
+        
+        header { text-align: center; padding: 35px 15px; background: linear-gradient(180deg, rgba(0,229,255,0.08) 0%, rgba(11,19,32,0) 100%); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 25px; }
+        header .badge { display: inline-block; background: rgba(0, 229, 255, 0.1); color: var(--accent-cyan); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 10px; border: 1px solid rgba(0, 229, 255, 0.3); font-weight: 500; }
+        header h1 { color: #ffffff; font-size: 1.8rem; font-weight: 600; margin-bottom: 10px; line-height: 1.3; }
+        header p { color: var(--text-muted); font-size: 0.95rem; max-width: 850px; margin: 0 auto; }
+        
+        /* Academic Meta Info Grid */
+        .academic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .academic-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 18px; }
+        .academic-card .label { font-size: 0.8rem; color: var(--accent-orange); margin-bottom: 4px; font-weight: 500; }
+        .academic-card .val { font-size: 1rem; color: #ffffff; font-weight: 600; line-height: 1.4; }
+
+        .section-header { display: flex; align-items: center; gap: 10px; margin: 35px 0 15px 0; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        .section-header i { font-size: 1.3rem; color: var(--accent-green); }
+        .section-header h2 { font-size: 1.25rem; color: var(--accent-green); font-weight: 600; }
+        
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px; transition: 0.3s; }
+        .card:hover { border-color: var(--accent-cyan); transform: translateY(-2px); }
+        .card h3 { color: var(--accent-cyan); font-size: 1.05rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .card p, .card ul { color: var(--text-muted); font-size: 0.9rem; }
+        .card ul { padding-left: 18px; margin-top: 6px; }
+        .card ul li { margin-bottom: 6px; }
+
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: var(--bg-card); border-radius: 8px; overflow-x: auto; display: block; border: 1px solid var(--border-color); }
+        th, td { padding: 12px 14px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+        th { background: rgba(0, 229, 255, 0.08); color: var(--accent-cyan); font-weight: 600; }
+        td { color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        
+        .text-before { color: #ff5252; font-weight: 500; }
+        .text-after { color: var(--accent-green); font-weight: 600; }
+        .badge-diff { background: rgba(0, 230, 118, 0.15); color: var(--accent-green); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+
+        /* Gantt Chart Custom Styles */
+        .gantt-bar { background: var(--accent-cyan); height: 12px; border-radius: 6px; display: block; }
+        .gantt-bar.p2 { background: var(--accent-blue); }
+        .gantt-bar.p3 { background: var(--accent-orange); }
+        .gantt-bar.p4 { background: var(--accent-green); }
+
+        .formula-box { 
+            background: var(--code-bg); 
+            border-left: 4px solid var(--accent-cyan); 
+            padding: 12px 15px; 
+            border-radius: 0 8px 8px 0; 
+            margin: 12px 0; 
+            font-family: 'Roboto Mono', monospace; 
+            font-size: 0.82rem; 
+            color: var(--accent-cyan); 
+            white-space: pre-wrap; 
+            word-break: break-word; 
+            line-height: 1.6;
+        }
+        
+        .ref-list { list-style: none; padding: 0; }
+        .ref-list li { background: var(--bg-card); border: 1px solid var(--border-color); padding: 14px 16px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 12px; align-items: flex-start; }
+        .ref-list li i { color: var(--accent-cyan); margin-top: 4px; }
+
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        .team-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: center; }
+        .team-avatar-img { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid var(--accent-cyan); 
+            margin: 0 auto 12px auto; 
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.25); 
+            display: block; 
+        }
+        .team-name { font-size: 1.15rem; color: #ffffff; font-weight: 600; margin-bottom: 4px; }
+        .team-id { font-family: 'Roboto Mono', monospace; font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 6px; }
+        .team-dept { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+        .team-role { font-size: 0.88rem; color: var(--accent-green); background: rgba(0, 230, 118, 0.08); padding: 4px 12px; border-radius: 6px; margin-bottom: 12px; font-weight: 500; display: inline-block; }
+        .team-desc { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; text-align: left; border-top: 1px dashed var(--border-color); padding-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav>
+        <div class="nav-brand"><i class="fa-solid fa-snowflake"></i> Cold Chain Telematics DX</div>
+        <ul class="nav-links">
+            <li><a href="#sec1">1. บทนำ</a></li>
+            <li><a href="#sec2">2. แผนการงาน</a></li>
+            <li><a href="#sec3">3. อุณหพลศาสตร์</a></li>
+            <li><a href="#sec4">4. สมดุลพลังงาน</a></li>
+            <li><a href="#sec5">5. COP</a></li>
+            <li><a href="#sec6">6. IoT Stack</a></li>
+            <li><a href="#sec7">7. AI Model</a></li>
+            <li><a href="#sec8">8. Muda</a></li>
+            <li><a href="#sec9">9. Kaizen/GX</a></li>
+            <li><a href="#sec10">10. เอกสารอ้างอิง</a></li>
+            <li><a href="#sec11">11. ผู้จัดทำ</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <span class="badge">Industrial Engineering & Digital Transformation (IE DX/GX)</span>
+        <h1>โครงการพัฒนาระบบทำความเย็นและควบคุมเสถียรภาพความเย็นคงที่</h1>
+        <p>Cooling & Cold Chain Stabilization System for Smart Electronics Clean Room Direct Expansion (DX)</p>
+    </header>
+
+    <!-- Academic Metadata Grid -->
+    <div class="academic-grid">
+        <div class="academic-card">
+            <div class="label">รายวิชา</div>
+            <div class="val">ENG-216 วิศวกรรมความร้อนของไหล</div>
+        </div>
+        <div class="academic-card">
+            <div class="label">อาจารย์ผู้สอน</div>
+            <div class="val">ผศ.ดร.วิภาวดี วงษ์สุวรรณ์</div>
+        </div>
+        <div class="academic-card">
+            <div class="label">สาขาวิชา</div>
+            <div class="val">วิศวกรรมอุตสาหการและระบบจัดการอัจฉริยะ (IE)</div>
+        </div>
+        <div class="academic-card">
+            <div class="label">สถาบัน</div>
+            <div class="val">สถาบันเทคโนโลยีไทย-ญี่ปุ่น (TNI)</div>
+        </div>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="section-header" id="sec1">
+        <i class="fa-solid fa-circle-info"></i>
+        <h2>บทที่ 1 — บทนำและวัตถุประสงค์ (Introduction & Objectives)</h2>
+    </div>
+    
+    <div class="card" style="margin-bottom: 20px;">
+        <h3><i class="fa-solid fa-book-open"></i> ที่มาและความสำคัญของโครงงาน (Background & Rationale)</h3>
+        <p>ในอุตสาหกรรมการผลิตชิ้นส่วนอิเล็กทรอนิกส์และสารกึ่งตัวนำ (Semiconductor) ห้องสะอาด (Clean Room) ถือเป็นพื้นที่วิกฤตที่ต้องได้รับการควบคุมสภาวะแวดล้อมอย่างเข้มงวด ความผันผวนของอุณหภูมิแม้เพียงเล็กน้อยสามารถก่อให้เกิดความเค้นความร้อน (Thermal Stress) ส่งผลกระทบต่อคุณภาพผลิตภัณฑ์ และทำให้อัตราการสูญเสีย (Defect Rate) สูงขึ้นอย่างมีนัยสำคัญ</p>
+        <br>
+        <p>นอกจากนี้ ระบบทำความเย็นแบบเดิมมักสิ้นเปลืองพลังงานไฟฟ้าสูงและปล่อยก๊าซเรือนกระจกปริมาณมาก การประยุกต์ใช้ทฤษฎี **วิศวกรรมความร้อนของไหล (ENG-216)** ผสานกับเทคโนโลยี Digital Transformation (DX), IoT และปัญญาประดิษฐ์ (AI) จึงมีความสำคัญอย่างยิ่งในการช่วยวิเคราะห์และปรับปรุงประสิทธิภาพการทำความเย็น ควบคุมอุณหภูมิให้มีสถียรภาพ และขับเคลื่อนอุตสาหกรรมสู่การเป็นโรงงานอัจฉริยะที่เป็นมิตรต่อสิ่งแวดล้อม (Green Transformation: GX)</p>
+    </div>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3><i class="fa-solid fa-bullseye"></i> วัตถุประสงค์หลักเชิงวิศวกรรม</h3>
+            <ul>
+                <li><strong>วิเคราะห์และรักษาสภาพแวดล้อมวิกฤต:</strong> ควบคุมอุณหภูมิห้องสะอาดผลิตสารกึ่งตัวนำให้อยู่ในเกณฑ์ 22.0 ± 0.5°C และความชื้นสัมพัทธ์ 45 ± 5% RH</li>
+                <li><strong>ยกระดับการทำความเย็นแบบ DX:</strong> เสริมประสิทธิภาพระบบ Direct Expansion ด้วยเซนเซอร์ตรวจวัดความละเอียดสูงทางวิศวกรรมเทเลเมติกส์</li>
+                <li><strong>เพิ่มค่าสัมประสิทธิ์ประสิทธิภาพ (COP):</strong> ลดการใช้พลังงานส่วนเกินในวงจรทำความเย็นด้วยเทคโนโลยี IoT และ AI Predictive Control</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> สภาพปัญหาเดิม (Problem Statement)</h3>
+            <ul>
+                <li><strong>ความผันผวนของอุณหภูมิ (Thermal Fluctuation):</strong> ระบบเดิมสวิงสูงถึง ± 2.0°C ก่อให้เกิดความเค้นความร้อน (Thermal Stress) บนแผ่นเวเฟอร์ ส่งผลให้อัตราของเสียสูง</li>
+                <li><strong>ความสูญเปล่าทางพลังงาน (Energy Waste):</strong> คอมเพรสเซอร์ทำงานแบบ On/Off ความเร็วคงที่ ทำให้เกิดกระแสการกระชากไฟ (Inrush Current) สูงและสิ้นเปลืองพลังงาน</li>
+                <li><strong>การบำรุงรักษาแบบแก้ไขเมื่อชำรุด (Breakdown Maintenance):</strong> ขาดระบบแจ้งเตือนเชิงรุก ทำให้เกิดปัญหา Unplanned Downtime ในสายการผลิต</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION 2 (ปรับเป็น 5 สัปดาห์) -->
+    <div class="section-header" id="sec2">
+        <i class="fa-solid fa-calendar-check"></i>
+        <h2>บทที่ 2 — แผนการดำเนินงานโครงงาน (Project Management Plan — 5 Weeks)</h2>
+    </div>
+    <div class="card">
+        <h3><i class="fa-solid fa-list-check"></i> ตารางแผนการดำเนินงานและจัดสรรชั่วโมงทำงาน (5 สัปดาห์ / รวม 90 ชม.)</h3>
+        <p style="margin-bottom: 15px;">กำหนดภาระงานคนละ 30 ชั่วโมง (สมาชิก 3 คน รวม 90 ชั่วโมงปฏิบัติงาน) เร่งรัดดำเนินงานให้เสร็จสิ้นภายใน 5 สัปดาห์ ดังนี้:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 32%;">ขั้นตอน / กิจกรรมหลัก (Task Description)</th>
+                    <th style="width: 15%;">ผู้รับผิดชอบหลัก</th>
+                    <th style="width: 13%; text-align: center;">ภาระงาน (ชม.)</th>
+                    <th style="width: 8%; text-align: center;">W1</th>
+                    <th style="width: 8%; text-align: center;">W2</th>
+                    <th style="width: 8%; text-align: center;">W3</th>
+                    <th style="width: 8%; text-align: center;">W4</th>
+                    <th style="width: 8%; text-align: center;">W5</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- W1 -->
+                <tr>
+                    <td><strong>สัปดาห์ที่ 1: ศึกษาข้อมูลและคำนวณ Thermodynamics</strong><br>- สำรวจสภาวะห้องสะอาด & วิเคราะห์ State 1-4, COP</td>
+                    <td>วรัญชิต<br>(Leader)</td>
+                    <td style="text-align: center;"><span class="badge-diff">18 ชม. (ทีม)</span></td>
+                    <td style="text-align: center;"><span class="gantt-bar"></span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <!-- W2 -->
+                <tr>
+                    <td><strong>สัปดาห์ที่ 2: ออกแบบ IoT Stack & อุปกรณ์วัด</strong><br>- เลือกเซนเซอร์ RTD/Pressure & Modbus RS485</td>
+                    <td>สุพรรสา<br>(IoT/AI Spec)</td>
+                    <td style="text-align: center;"><span class="badge-diff">18 ชม. (ทีม)</span></td>
+                    <td></td>
+                    <td style="text-align: center;"><span class="gantt-bar p2"></span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <!-- W3 -->
+                <tr>
+                    <td><strong>สัปดาห์ที่ 3: พัฒนา AI Model & Muda Elimination</strong><br>- AI Predictive Control & วิเคราะห์จุดสูญเสียพลังงาน</td>
+                    <td>สุพรรสา / สรวิศ</td>
+                    <td style="text-align: center;"><span class="badge-diff">18 ชม. (ทีม)</span></td>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align: center;"><span class="gantt-bar p3"></span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <!-- W4 -->
+                <tr>
+                    <td><strong>สัปดาห์ที่ 4: ออกแบบ Kaizen, GX & Dashboard</strong><br>- สรุปผล Carbon Offset & พัฒนา Web Dashboard</td>
+                    <td>สรวิศ<br>(GX/Web Dev)</td>
+                    <td style="text-align: center;"><span class="badge-diff">18 ชม. (ทีม)</span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align: center;"><span class="gantt-bar p3"></span></td>
+                    <td></td>
+                </tr>
+                <!-- W5 -->
+                <tr>
+                    <td><strong>สัปดาห์ที่ 5: ทดสอบระบบ สรุปรายงาน & นำเสนอ</strong><br>- รวมเล่มรายงานวิชา ENG-216 & นำเสนอผลงาน</td>
+                    <td>ทีมงานทั้งหมด<br>(3 คน)</td>
+                    <td style="text-align: center;"><span class="badge-diff">18 ชม. (ทีม)</span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align: center;"><span class="gantt-bar p4"></span></td>
+                </tr>
+                <!-- Total Row -->
+                <tr style="background: rgba(0, 229, 255, 0.05);">
+                    <td colspan="2"><strong>รวมชั่วโมงการทำงานทั้งสิ้น (30 ชม. × 3 คน)</strong></td>
+                    <td style="text-align: center; color: var(--accent-green); font-weight: bold;">90 ชั่วโมง</td>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); font-size: 0.82rem;">(ปฏิบัติงานคนละ 6 ชั่วโมง/สัปดาห์ ระยะเวลา 5 สัปดาห์)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section-header" id="sec3">
+        <i class="fa-solid fa-temperature-arrow-down"></i>
+        <h2>บทที่ 3 — ทฤษฎีและระบบอุณหพลศาสตร์ (Thermodynamics Systems)</h2>
+    </div>
+    <p style="color: var(--text-muted); margin-bottom: 12px; font-size: 0.9rem;">การวิเคราะห์วงจรทำความเย็นแบบอัดไอมาตรฐาน (Vapor Compression Refrigeration Cycle) โดยใช้สารทำความเย็น R-134a ที่สภาวะการทำงานวิกฤต 4 จุด (State Points 1–4):</p>
+    <table>
+        <thead>
+            <tr>
+                <th>State Point</th>
+                <th>ตำแหน่งในระบบ</th>
+                <th>สถานะทางกายภาพ (Phase)</th>
+                <th>ความดัน (P)</th>
+                <th>อุณหภูมิ (T)</th>
+                <th>เอนทัลปี (h)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>State 1</strong></td>
+                <td>ทางเข้าคอมเพรสเซอร์ (Compressor Inlet)</td>
+                <td>ไอซูเปอร์ฮีต (Superheated Vapor)</td>
+                <td>2.93 bar</td>
+                <td>5.0°C</td>
+                <td>401.5 kJ/kg</td>
+            </tr>
+            <tr>
+                <td><strong>State 2</strong></td>
+                <td>ทางออกจากคอมเพรสเซอร์ / ทางเข้าคอนเดนเซอร์</td>
+                <td>ไอความดันสูงอุณหภูมิสูง (Superheated Gas)</td>
+                <td>11.60 bar</td>
+                <td>65.0°C</td>
+                <td>441.2 kJ/kg</td>
+            </tr>
+            <tr>
+                <td><strong>State 3</strong></td>
+                <td>ทางออกจากคอนเดนเซอร์ / ทางเข้าวาล์วขยายตัว</td>
+                <td>ของเหลวอิ่มตัว/ซับคูล (Subcooled Liquid)</td>
+                <td>11.60 bar</td>
+                <td>42.0°C</td>
+                <td>259.1 kJ/kg</td>
+            </tr>
+            <tr>
+                <td><strong>State 4</strong></td>
+                <td>ทางเข้าอีแวปเพอเรเตอร์ (Evaporator Inlet)</td>
+                <td>ของเหลวผสมไอความดันต่ำ (Flash Mixture)</td>
+                <td>2.93 bar</td>
+                <td>0.0°C</td>
+                <td>259.1 kJ/kg</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- SECTION 4 -->
+    <div class="section-header" id="sec4">
+        <i class="fa-solid fa-calculator"></i>
+        <h2>บทที่ 4 — การคำนวณสมดุลมวลและพลังงาน (Mass & Energy Balance)</h2>
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <h3>1. อัตราการทำความเย็น (Q_evap)</h3>
+            <div class="formula-box">Q_evap = m * (h1 - h4)</div>
+            <p>กำหนดให้ภาระความเย็นที่ต้องกำจัดออกจากห้องสะอาดเท่ากับ 35.0 kW (10 Tons):</p>
+            <div class="formula-box">m = 35.0 kW / (401.5 - 259.1) kJ/kg
+  = 0.2458 kg/s</div>
+        </div>
+        <div class="card">
+            <h3>2. กำลังงานคอมเพรสเซอร์ (W_comp)</h3>
+            <div class="formula-box">W_comp = m * (h2 - h1)</div>
+            <p>คำนวณกำลังงานป้อนเข้าทางทฤษฎีสำหรับขั้นตอนการอัดไอ:</p>
+            <div class="formula-box">W_comp = 0.2458 kg/s * (441.2 - 401.5) kJ/kg
+       = 9.758 kW</div>
+        </div>
+        <div class="card">
+            <h3>3. ความร้อนระบายออก (Q_cond)</h3>
+            <div class="formula-box">Q_cond = m * (h2 - h3)</div>
+            <p>ความร้อนรวมที่ต้องถ่ายเทออกผ่านทางคอยล์ร้อน (Condenser):</p>
+            <div class="formula-box">Q_cond = 0.2458 kg/s * (441.2 - 259.1) kJ/kg
+       = 44.758 kW</div>
+        </div>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="section-header" id="sec5">
+        <i class="fa-solid fa-gauge-high"></i>
+        <h2>บทที่ 5 — การประเมินประสิทธิภาพระบบ (COP Analysis)</h2>
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <h3>Theoretical COP (สัมประสิทธิ์ทางทฤษฎี)</h3>
+            <div class="formula-box">COP_th = Q_evap / W_comp
+       = 35.0 kW / 9.758 kW
+       = 3.587</div>
+            <p>คำนวณจากสภาวะอุดมคติบน P-h Diagram โดยไม่มีความสูญเสียทางความร้อนและการเสียดทาน</p>
+        </div>
+        <div class="card">
+            <h3>Actual COP (สัมประสิทธิ์สภาวะจริง)</h3>
+            <p>พิจารณาประสิทธิภาพมอเตอร์ (eta_m = 90%) และประสิทธิภาพ Isentropic (eta_is = 78%):</p>
+            <div class="formula-box">W_actual = 9.758 kW / (0.78 * 0.90)
+         = 13.90 kW</div>
+            <div class="formula-box">COP_act = 35.0 kW / 13.90 kW
+        = 2.518</div>
+        </div>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="section-header" id="sec6">
+        <i class="fa-solid fa-network-wired"></i>
+        <h2>บทที่ 6 — สถาปัตยกรรม IoT (IoT 4-Layer System Stack)</h2>
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <h3>1. Sensing & Actuation Layer</h3>
+            <p>ชั้นอุปกรณ์ตรวจวัดและควบคุม:</p>
+            <ul>
+                <li><strong>RTD PT100:</strong> ตรวจวัดอุณหภูมิสารทำความเย็น ณ State 1–4 (Accuracy ± 0.1°C)</li>
+                <li><strong>Pressure Transducers:</strong> วัดความดัน Suction/Discharge (Signal 4–20 mA)</li>
+                <li><strong>Digital Power Meter:</strong> ตรวจวัดแรงดัน กระแส และ Power Factor มอเตอร์</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>2. Network & Gateway Layer</h3>
+            <p>ชั้นโครงข่ายและการรับส่งข้อมูล:</p>
+            <ul>
+                <li><strong>Modbus RTU over RS-485:</strong> เชื่อมต่อเซนเซอร์เข้าสู่ Industrial Gateway</li>
+                <li><strong>IoT Edge Gateway:</strong> ประมวลผลเบื้องต้น และแปลงโปรโตคอลเป็น MQTT</li>
+                <li><strong>TLS/SSL Encryption:</strong> เข้ารหัสการส่งข้อมูลผ่านเครือข่ายไร้สายเพื่อความปลอดภัย</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>3. Data Engine Layer</h3>
+            <p>ชั้นการจัดการข้อมูลปริมาณมาก:</p>
+            <ul>
+                <li><strong>Time-Series DB (InfluxDB):</strong> จัดเก็บข้อมูลอุณหภูมิและความดันทุกๆ 1 วินาที</li>
+                <li><strong>Data Cleaning & Pipeline:</strong> กรองสัญญาณรบกวน (Noise Filtering) ด้วย Kalman Filter</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>4. Application Layer</h3>
+            <p>ชั้นการแสดงผลและโต้ตอบผู้ใช้:</p>
+            <ul>
+                <li><strong>Real-time Telemetry Dashboard:</strong> แสดงผลสภาวะ COP, P-h Diagram</li>
+                <li><strong>Alert Notification:</strong> แจ้งเตือนความผิดปกติผ่าน LINE Messaging API แบบทันที</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION 7 -->
+    <div class="section-header" id="sec7">
+        <i class="fa-solid fa-brain"></i>
+        <h2>บทที่ 7 — โมเดลปัญญาประดิษฐ์ (AI Predictive & Load Forecasting)</h2>
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <h3>1. Predictive Maintenance (Random Forest Classifier)</h3>
+            <p>แบบจำลองประเมินสุขภาพอุปกรณ์ วิเคราะห์ความสัมพันธ์ระหว่างสัดส่วนความดัน (Pressure Ratio), แรงสั่นสะเทือน และอุณหภูมิไอไอเสีย เพื่อคาดการณ์ความเสี่ยงในการชำรุดของคอมเพรสเซอร์และวาล์วขยายตัวล่วงหน้า 14 วัน</p>
+        </div>
+        <div class="card">
+            <h3>2. Thermal Load Forecasting (LSTM Neural Network)</h3>
+            <p>แบบจำลอง Long Short-Term Memory (LSTM) วิเคราะห์ข้อมูลอนุกรมเวลาเพื่อทำนายภาระความร้อนห้องสะอาดล่วงหน้า 1 ชั่วโมง โดยนำปัจจัยสภาพอากาศภายนอกและตารางการทำงานของบุคลากรมาคำนวณ เพื่อปรับความเร็วรอบ VFD อินเวอร์เตอร์ล่วงหน้าอย่างนุ่มนวล</p>
+        </div>
+    </div>
+
+    <!-- SECTION 8 -->
+    <div class="section-header" id="sec8">
+        <i class="fa-solid fa-trash-can"></i>
+        <h2>บทที่ 8 — การลดความสูญเปล่าทางพลังงาน (Muda Elimination)</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ประเภทความสูญเปล่า (Muda)</th>
+                <th>สาเหตุทางกายภาพที่พบในระบบเดิม</th>
+                <th>มาตรการแก้ไขและปรับปรุงเชิงวิศวกรรม</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Over-Cooling Muda</strong><br>(ความสูญเปล่าจากการทำความเย็นเกิน)</td>
+                <td>คอมเพรสเซอร์ทำงานเต็มกำลังตลอดเวลาเมื่ออุณหภูมิตกขอบเขตวิกฤต</td>
+                <td>ติดตั้งระบบปรับความเร็วรอบอินเวอร์เตอร์ (VFD) ควบคุมการหมุนตามภาระจริง</td>
+            </tr>
+            <tr>
+                <td><strong>2. Pressure Drop Muda</strong><br>(ความสูญเปล่าจากความดันสูญเสีย)</td>
+                <td>การสะสมของคราบน้ำมันหล่อลื่นในท่อส่งสารทำความเย็น และระยะท่อที่ยาวเกินไป</td>
+                <td>ทำความสะอาดท่อด้วยน้ำยาเคมี และติดตั้ง High-Efficiency Oil Separator</td>
+            </tr>
+            <tr>
+                <td><strong>3. Waiting Muda</strong><br>(ความสูญเปล่าจากการรอคอยการตอบสนอง)</td>
+                <td>ระบบชดเชยความเย็นตอบสนองล่าช้าขณะมีกิจกรรมการเปิด-ปิดประตูห้องสะอาด</td>
+                <td>ใช้ AI Load Forecasting สั่งเร่งรอบความเย็นล่วงหน้าก่อนการเปิดประตู</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- SECTION 9 -->
+    <div class="section-header" id="sec9">
+        <i class="fa-solid fa-leaf"></i>
+        <h2>บทที่ 9 — การปรับปรุง Kaizen 3 ด้าน และ Green Transformation (GX)</h2>
+    </div>
+    
+    <div class="card-grid">
+        <div class="card">
+            <h3>Hardware Kaizen</h3>
+            <p>เปลี่ยนคอมเพรสเซอร์เป็นแบบ Variable Inverter Scroll และหุ้มฉนวนท่อซักชันด้วย Aeroflex หนา 1 นิ้วเพื่อลดการสูญเสียความเย็น</p>
+        </div>
+        <div class="card">
+            <h3>Software Kaizen</h3>
+            <p>พัฒนาอัลกอริทึม Adaptive PID ร่วมกับ AI Feedforward Control ควบคุมวาล์วขยายตัวอิเล็กทรอนิกส์ (EEV)</p>
+        </div>
+        <div class="card">
+            <h3>Process Kaizen</h3>
+            <p>ปรับปรุงมาตรฐานขั้นตอนการปฏิบัติงาน (SOP) และกำหนดวงรอบการล้างทำความสะอาดคอยล์ร้อนคอยล์เย็นทุก 3 เดือน</p>
+        </div>
+    </div>
+
+    <!-- ตารางเปรียบเทียบก่อน-หลัง Kaizen & GX -->
+    <div class="card" style="margin-top: 15px;">
+        <h3><i class="fa-solid fa-table-cells"></i> ตารางเปรียบเทียบประสิทธิภาพก่อนและหลังการปรับปรุง (Kaizen Comparison)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ดัชนีชี้วัด (KPIs)</th>
+                    <th>ก่อนปรับปรุง (Baseline)</th>
+                    <th>หลังปรับปรุง (Kaizen & DX)</th>
+                    <th>ผลการเปลี่ยนแปลง (Difference)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>การควบคุมอุณหภูมิ (Clean Room Temp)</strong></td>
+                    <td class="text-before">22.0 ± 2.0 °C</td>
+                    <td class="text-after">22.0 ± 0.5 °C</td>
+                    <td><span class="badge-diff">เสถียรภาพเพิ่มขึ้น 75%</span></td>
+                </tr>
+                <tr>
+                    <td><strong>กำลังไฟฟ้าที่ใช้ (Power Consumption)</strong></td>
+                    <td class="text-before">13.90 kW</td>
+                    <td class="text-after">8.80 kW</td>
+                    <td><span class="badge-diff">ลดลง 36.7% (-5.10 kW)</span></td>
+                </tr>
+                <tr>
+                    <td><strong>สัมประสิทธิ์ประสิทธิภาพจริง (Actual COP)</strong></td>
+                    <td class="text-before">2.518</td>
+                    <td class="text-after">3.977</td>
+                    <td><span class="badge-diff">เพิ่มขึ้น +57.9%</span></td>
+                </tr>
+                <tr>
+                    <td><strong>การใช้พลังงานไฟฟ้าต่อปี (Energy Usage)</strong></td>
+                    <td class="text-before">88,304 kWh/ปี</td>
+                    <td class="text-after">55,904 kWh/ปี</td>
+                    <td><span class="badge-diff">ประหยัด 32,400 kWh/ปี</span></td>
+                </tr>
+                <tr>
+                    <td><strong>ค่าใช้จ่ายพลังงานต่อปี (Energy Cost)</strong></td>
+                    <td class="text-before">397,368 บาท/ปี</td>
+                    <td class="text-after">251,568 บาท/ปี</td>
+                    <td><span class="badge-diff">ประหยัด 145,800 บาท/ปี</span></td>
+                </tr>
+                <tr>
+                    <td><strong>ปริมาณปล่อยคาร์บอน (CO₂ Emission)</strong></td>
+                    <td class="text-before">44.14 tCO₂e/ปี</td>
+                    <td class="text-after">27.95 tCO₂e/ปี</td>
+                    <td><span class="badge-diff">ลดลง 16.20 tCO₂e/ปี</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="margin-top: 15px;">
+        <h3><i class="fa-solid fa-seedling"></i> การประเมิน Carbon Offset (Green Transformation: GX)</h3>
+        <p>จากการปรับปรุงระบบ สามารถลดการใช้พลังงานไฟฟ้าได้ <strong>32,400 kWh/ปี</strong></p>
+        <div class="formula-box">Emission Factor (Thailand Grid) = 0.4999 kgCO2e/kWh
+
+GHG Reduction = 32,400 kWh/ปี * 0.4999 kgCO2e/kWh
+              = 16,196.76 kgCO2e/ปี
+
+Carbon Offset Potential ≈ 16.20 tCO2e/ปี</div>
+    </div>
+
+    <!-- SECTION 10 (รองสุดท้าย: เอกสารอ้างอิง) -->
+    <div class="section-header" id="sec10">
+        <i class="fa-solid fa-book-bookmark"></i>
+        <h2>บทที่ 10 — เอกสารอ้างอิง (References)</h2>
+    </div>
+    <ul class="ref-list">
+        <li>
+            <i class="fa-solid fa-bookmark"></i>
+            <div>
+                <strong>ASHRAE Handbook — Refrigeration (SI Edition).</strong> American Society of Heating, Refrigerating and Air-Conditioning Engineers, Inc., Atlanta, GA. (การคำนวณวงจรทำความเย็นและคุณสมบัติสารทำความเย็น R-134a)
+            </div>
+        </li>
+        <li>
+            <i class="fa-solid fa-bookmark"></i>
+            <div>
+                <strong>Cengel, Y. A., & Boles, M. A.</strong> <em>Thermodynamics: An Engineering Approach.</em> McGraw-Hill Education. (สมดุลมวลและพลังงานในระบบเปิด/ปิด)
+            </div>
+        </li>
+        <li>
+            <i class="fa-solid fa-bookmark"></i>
+            <div>
+                <strong>ISO 14644-1: Cleanrooms and associated controlled environments.</strong> International Organization for Standardization. (มาตรฐานระดับความสะอาดและการควบคุมอุณหภูมิความชื้นในห้อง Clean Room)
+            </div>
+        </li>
+        <li>
+            <i class="fa-solid fa-bookmark"></i>
+            <div>
+                <strong>องค์การบริหารจัดการก๊าซเรือนกระจก (องค์การมหาชน) — TGO.</strong> <em>ค่าสัมประสิทธิ์การปล่อยก๊าซเรือนกระจกจากการใช้ไฟฟ้าของประเทศไทย (Grid Emission Factor 2026).</em> (ใช้ในการคำนวณ Carbon Offset / GX)
+            </div>
+        </li>
+    </ul>
+
+    <!-- SECTION 11 (บทสุดท้าย: รายชื่อผู้จัดทำ) -->
+    <div class="section-header" id="sec11">
+        <i class="fa-solid fa-users"></i>
+        <h2>บทที่ 11 — รายชื่อผู้จัดทำโครงงาน (Project Team)</h2>
+    </div>
+    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">วิศวกรรมอุตสาหการและระบบจัดการอัจฉริยะ (IE) สถาบันเทคโนโลยีไทย-ญี่ปุ่น (TNI)</p>
+    
+    <div class="team-grid">
+        <!-- คนที่ 1 -->
+        <div class="team-card">
+            <img src="waranit.jpg" alt=""><img src="S__22396938.jpg" width="250" height="300" alt=""/>
+            <div class="team-name">นายวรัญชิต อุบลบาน</div>
+            <div class="team-id">รหัสนักศึกษา 2511410132</div>
+            <div class="team-dept">วิศวกรรมอุตสาหการ สถาบันเทคโนโลยีไทย-ญี่ปุ่น (TNI)</div>
+            <div class="team-role">Project Leader & Thermo Specialist (30 ชม.)</div>
+            <div class="team-desc">
+                • บริหารจัดการและควบคุมภาพรวมโครงงานวิศวกรรม<br>
+                • วิเคราะห์สมดุลมวลและพลังงานวงจร R-134a State Points 1–4<br>
+                • คำนวณและประเมินค่า COP ทางทฤษฎีและสภาวะการทำงานจริง
+            </div>
+        </div>
+
+        <!-- คนที่ 2 -->
+        <div class="team-card">
+            <img src="suparsa.jpg" alt=""><img src="S__22396939.jpg" width="250" height="300" alt=""/>
+            <div class="team-name">นางสาวสุพรรสา ไกรสุข</div>
+            <div class="team-id">รหัสนักศึกษา 2511410066</div>
+            <div class="team-dept">วิศวกรรมอุตสาหการ สถาบันเทคโนโลยีไทย-ญี่ปุ่น (TNI)</div>
+            <div class="team-role">DX & Systems Architect / IoT Specialist (30 ชม.)</div>
+            <div class="team-desc">
+                • ออกแบบและวางสถาปัตยกรรมระบบ IoT 4-Layer System Stack<br>
+                • กำหนดตำแหน่งและติดตั้งเซนเซอร์ตรวจวัดแรงดัน/อุณหภูมิ<br>
+                • วางโครงสร้าง AI Predictive Maintenance และ Load Forecasting
+            </div>
+        </div>
+
+        <!-- คนที่ 3 -->
+        <div class="team-card">
+            <img src="sorawit.jpg" alt=""><img src="S__22396937.jpg" width="250" height="300" alt=""/>
+            <div class="team-name">นายสรวิศ มุยน้อย</div>
+            <div class="team-id">รหัสนักศึกษา 2511410124</div>
+            <div class="team-dept">วิศวกรรมอุตสาหการ สถาบันเทคโนโลยีไทย-ญี่ปุ่น (TNI)</div>
+            <div class="team-role">GX & Kaizen Engineer / Web Dev (30 ชม.)</div>
+            <div class="team-desc">
+                • วิเคราะห์จุดเกิดความสูญเปล่าทางพลังงาน (Muda Elimination)<br>
+                • วางแผนมาตรการปรับปรุง Kaizen 3 ด้าน และประเมิน Carbon Offset (GX)<br>
+                • ออกแบบและพัฒนา Telematics Web Dashboard
+            </div>
+      </div>
+    </div>
+
+</div>
+</body>
+</html>
